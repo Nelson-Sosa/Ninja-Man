@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NinjaMan</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .row {
+            line-height: 0;
+        }
+
+        .wall {
+            background-color: blue;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+        }
+
+        .sushi {
+            background-color: black;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+            background-image: url('sushi.png');
+            background-size: contain;
+        }
+
+        .onigiri {
+            background-color: black;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+            background-image: url('onigiri.png');
+            background-size: contain;
+        }
+
+        .blank {
+            background-color: black;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+        }
+
+        #ninjaman {
+            background-color: black;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+            background-image: url('ninja.gif');
+            background-size: contain;
+            position: absolute;
+            top: 40px;
+            left: 40px;
+        }
+
+        .ghost {
+            background-color: red;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+            background-image: url('scaredy.png');
+            background-size: contain;
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="world"></div>
+    <div id="ninjaman"></div>
+    <div id="score">Score: 0 Lives: 3</div>
+
+    <script type="text/javascript">
+        var score = 0;
+        var lives = 3;
+        var world = [];
+
+        function generateWorld() {
+            world = [];
+            for (var row = 0; row < 11; row++) {
+                world[row] = [];
+                for (var col = 0; col < 5; col++) {
+                    var randomNumber = Math.floor(Math.random() * 4);
+                    world[row][col] = randomNumber;
+                }
+            }
+            world[1][1] = 0;
+        }
+
+        generateWorld();
+
+        var worldDict = {
+            0: 'blank',
+            1: 'wall',
+            2: 'sushi',
+            3: 'onigiri',
+        };
+
+        function drawWorld() {
+            var output = "";
+            for (var row = 0; row < world.length; row++) {
+                output += "<div class='row'>";
+                for (var x = 0; x < world[row].length; x++) {
+                    if (world[row][x] === 2) {
+                        score++;
+                    } else if (world[row][x] === 3) {
+                        score += 2;
+                    }
+                    output += "<div class='" + worldDict[world[row][x]] + "'></div>";
+                }
+                output += "</div>";
+            }
+            document.getElementById('world').innerHTML = output;
+            document.getElementById('score').innerHTML = "Score: " + score + " Lives: " + lives;
+        }
+
+        drawWorld();
+
+        var ninjaman = {
+            x: 1,
+            y: 1,
+        };
+
+        function drawNinjaman() {
+            document.getElementById('ninjaman').style.top = ninjaman.y * 40 + 'px';
+            document.getElementById('ninjaman').style.left = ninjaman.x * 40 + 'px';
+        }
+
+        drawNinjaman();
+
+        var ghosts = [{
+            x: 8,
+            y: 6,
+        }];
+
+        function drawGhosts() {
+            for (var i = 0; i < ghosts.length; i++) {
+                var ghostElement = document.createElement('div');
+                ghostElement.className = 'ghost';
+                ghostElement.style.top = ghosts[i].y * 40 + 'px';
+                ghostElement.style.left = ghosts[i].x * 40 + 'px';
+                document.getElementById('world').appendChild(ghostElement);
+            }
+        }
+
+        window.onload = function () {
+            drawGhosts();
+        };
+
+        document.onkeydown = function (e) {
+            if (e.keyCode == 37 && ninjaman.x > 0) {
+                if (world[ninjaman.y][ninjaman.x - 1] != 1) {
+                    ninjaman.x--;
+                }
+            }
+            if (e.keyCode == 39 && ninjaman.x < world[0].length - 1) {
+                if (world[ninjaman.y][ninjaman.x + 1] != 1) {
+                    ninjaman.x++;
+                }
+            }
+            if (e.keyCode == 40 && ninjaman.y < world.length - 1) {
+                if (world[ninjaman.y + 1][ninjaman.x] != 1) {
+                    ninjaman.y++;
+                }
+            }
+
+
+            for (var i = 0; i < ghosts.length; i++) {
+                if (ninjaman.x === ghosts[i].x && ninjaman.y === ghosts[i].y) {
+                    lives--;
+                    if (lives <= 0) {
+                        alert("Game Over!");
+                        location.reload();
+                    }
+                }
+            }
+
+            world[ninjaman.y][ninjaman.x] = 0;
+            drawNinjaman();
+            drawWorld();
+        };
+    </script>
+</body>
+
+</html>
